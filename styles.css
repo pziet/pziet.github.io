@@ -1,0 +1,24 @@
+.menu {
+    font-family: helvetica;
+    border: 2px solid powderblue;
+    text-align: left;
+}
+.content {
+    font-family: helvetica;
+    text-align: left;
+}
+body {
+    background-color: white;
+}
+p {
+    font-family: helvetica;
+    font-size: 80%;
+}
+ul {
+    font-family: helvetica;
+    font-size: 80%;
+}
+ol {
+    font-family: helvetica;
+    font-size: 80%;
+}
