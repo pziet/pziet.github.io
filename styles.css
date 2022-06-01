@@ -1,7 +1,8 @@
 .menu {
     float: left;
     font-family: helvetica;
-    border: 2px solid powderblue;
+    /* border: 2px solid powderblue; */
+    background-color: powderblue;
     padding: 3px;
     text-align: left;
 }
