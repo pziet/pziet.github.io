@@ -1,6 +1,7 @@
 .menu {
     float: left;
     font-family: helvetica;
+    font-size: 14px;
     /* border: 2px solid powderblue; */
     background-color: powderblue;
     padding: 3px;
@@ -8,6 +9,7 @@
 }
 .content {
     font-family: helvetica;
+    font-size: 14px;
     text-align: left;
     margin-left: 90px;
     width: 600px;
