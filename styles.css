@@ -50,14 +50,14 @@
 
 .links-link {
     display: inline-block;
-    background-color: var(--pastel-red);
+    background-color: none;
     color: var(--dark-gray);
-    padding: 5px 10px;
+/*     padding: 5px 10px; */
     border-radius: 3px;
     text-decoration: none;
 }
 
 .links-link:hover {
-    background-color: var(--light-gray);
+    background-color: var(--pastel-red);
 }
 
