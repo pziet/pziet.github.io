@@ -24,7 +24,8 @@
     font-size: var(--font-size);
     background-color: var(--off-white);
     padding: 3px;
-    text-align: right;
+/*     text-align: right;
+ */    
     border-radius: 3px;
 /*     border-color: var(--black);
     outline: 2px solid var(--black);
@@ -35,7 +36,7 @@
 .content {
     font-size: var(--font-size);
     text-align: left;
-    margin-left: 110px;
+    margin-left: 10px;
     width: 600px;
 }
 
