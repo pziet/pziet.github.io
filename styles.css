@@ -29,8 +29,10 @@
 
 .content {
     text-align: left;
-    margin-left: 110px;
+    margin-left: 200px;
     width: 600px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .links-list {
@@ -55,3 +57,17 @@
     background-color: var(--pastel-red);
 }
 
+/* Media queries for responsive design */
+@media screen and (max-width: 768px) {
+  .content {
+    margin-left: 50px;
+    width: calc(100% - 60px);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .content {
+    margin-left: 20px;
+    width: calc(100% - 40px);
+  }
+}
