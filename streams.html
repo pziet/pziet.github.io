@@ -1,21 +1,54 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <link rel="stylesheet" href="styles.css">
     <title>Coding streams</title>
-  </head>
-  <div class="menu">
+</head>
+<div class="menu">
     <ul class="links-list">
-      <li><a href="index.html" class="links-link">About</a></li>
-      <li><a href="vita.html" class="links-link">Vita</a></li>
+        <li><a href="index.html" class="links-link">About</a></li>
+        <li><a href="streams.html" class="links-link">Projects/Streams</a></li>
+        <li><a href="vita.html" class="links-link">Vita</a></li>
     </ul>
-  </div>
-  <div class="content">
+</div>
+<div class="content">
+
     <body>
+        <h2>Projects/Streams</h2>
         <ul>
-            <li><a href="https://youtu.be/HX5BCtUexo8?si=LoqLEihGZw0_HXAM">Guaranteeing JSON output from GPT-2</a></li>
+            <li><a href="https://youtu.be/HX5BCtUexo8?si=LoqLEihGZw0_HXAM" target="_blank">Guaranteeing JSON output from GPT-2</a></li>
+
+            <p>I make GPT-2 generate output in JSON, and do this by fixing tokens to be parts of the JSON schema (the
+                "keys") and then only generating the "values" of the key:value pairs. Compared with other methods which
+                make repeated calls to the LLM and dynamically build the prompt, we only make *one* call to the LLM
+                seeing as we have direct access to the model.</p>
+
+            <p>
+                Post-mortem:
+            <ul>
+                <li>Really bad LLMs (i.e. in the way GPT-2 is worse than GPT-3) are better for testing since they are
+                    less likely to "obey" JSON schema, or any other structure. So your code has to be more robust to
+                    account for it. For example, GPT-4 might not need any of the additional code I wrote to handle the
+                    LLMs' output.</li>
+                <li>You can enforce any output structure in the same way I have done here.</li>
+                <li>Batch processing output could is more complicated as you may have the output sequences building at
+                    different rates.</li>
+            </ul>
+            </p>
+            <p>
+                More Details:
+            <ul>
+                <li>Jupyter Notebook: https://github.com/patrickmziet/build-nanogpt/blob/master/json.ipynb</li>
+                <li>JSON function: https://github.com/patrickmziet/build-nanogpt/blob/master/gpt_json.py</li>
+                <li>Model details: 124M parameter Transformer model trained on 10B tokens using 8xA100 GPUs, i.e GPT-2.
+                    Followed Andrej Karpathy's tutorial: https://youtu.be/l8pRSuU81PU?si=4iZ5YLJ0Ew-lP3S4 and repo:
+                    https://github.com/karpathy/build-nanogpt</li>
+                <li>Jsonformer: https://github.com/1rgs/jsonformer/tree/main</li>
+            </ul>
+            </p>
         </ul>
     </body>
-  </div>
-</html>
+</div>
 
+</html>
