@@ -1,63 +1,87 @@
 :root {
-    --pastel-red: #FFB570;
-    --pastel-yellow: #FFD6A5;
-    --dark-orange: #FFA500;
-    --light-orange: #FFC68F;
-    --dark-gray: #333333;
-    --light-gray: #CCCCCC;
-    --white: #FFFFFF;
-    --black: #000000;
-    --red: #FF6961;
-    --off-white: #FFFFF5;
-    --font: 'Arial', sans-serif;
-    --font-size: 18px;
-  }
+  --pastel-red: #FFB570;
+  --pastel-yellow: #FFD6A5;
+  --dark-orange: #FFA500;
+  --light-orange: #FFC68F;
+  --dark-gray: #333333;
+  --light-gray: #CCCCCC;
+  --white: #FFFFFF;
+  --black: #000000;
+  --red: #FF6961;
+  --off-white: #FFFFF5;
+  --font: 'Arial', sans-serif;
+  --font-size: 18px;
+}
 
-  body {
-    background-color: var(--off-white);
-    font-family: var(--font);
-    font-size: var(--font-size);
-    margin: 0;
-    padding: 0;
-  }
+body {
+  background-color: var(--off-white);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  margin: 0;
+  padding: 0;
+}
 
 .menu {
-    float: right;
-    padding: 3px;
-    border-radius: 3px;
-    margin-left: 10px;
+  float: right;
+  padding: 3px;
+  border-radius: 3px;
+  margin-left: 10px;
 }
 
 .content {
-    text-align: left;
-    /* margin-left: 200px; */
-    width: 100%;
-    max-width: 700px;
-    box-sizing: border-box;
-    padding: 0 20px; /* Add padding instead of margin */
+  text-align: left;
+  /* margin-left: 200px; */
+  width: 100%;
+  max-width: 700px;
+  box-sizing: border-box;
+  padding: 0 20px;
+  margin: 0 auto; /* Center the content */
+  /* Add padding instead of margin */
 }
 
 .links-list {
-    list-style-type: none;
-    padding: 0;
-    text-align: left;
-  }
-  
+  list-style-type: none;
+  padding: 0;
+  text-align: left;
+}
+
 .links-list li {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .links-link {
-    display: inline-block;
-    background-color: none;
-    color: var(--dark-gray);
-    padding: 5px 10px;
-    text-decoration: none;
+  display: inline-block;
+  background-color: none;
+  color: var(--dark-gray);
+  padding: 5px 10px;
+  text-decoration: none;
 }
 
 .links-link:hover {
-    background-color: var(--pastel-red);
+  background-color: var(--pastel-red);
 }
+
+
+/* Full-screen styles (default) */
+@media screen and (min-width: 1024px) {
+  .content {
+    margin-left: 200px;
+    /* Large margin for full-screen */
+    width: calc(100% - 200px);
+    /* Adjust width to account for margin */
+    max-width: 700px;
+  }
+}
+
+/* Styles for screens smaller than 1024px (roughly half of a typical desktop screen) */
+@media screen and (max-width: 1023px) {
+  .content {
+    margin-left: 0;
+    width: 100%;
+    padding: 0 20px;
+  }
+}
+
 
 /* Media queries for responsive design */
 @media screen and (max-width: 768px) {
