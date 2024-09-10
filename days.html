@@ -95,15 +95,21 @@
         }
 
         function updateWeekProgress() {
-            const today = new Date();
-            const dayOfWeek = today.getDay(); // 0 (Sunday) to 6 (Saturday)
-            const progress = dayOfWeek === 0 ? 7 : dayOfWeek; // Treat Sunday as 7
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 (Sunday) to 6 (Saturday)
+            const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 0 (Monday) to 6 (Sunday)
+
+            const secondsInDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const totalSecondsInWeek = 7 * 24 * 3600;
+            const weekProgress = (adjustedDay * 24 * 3600 + secondsInDay) / totalSecondsInWeek;
 
             const progressBar = document.getElementById('week-progress');
             const progressLabel = document.getElementById('progress-label');
 
-            progressBar.value = progress;
-            progressLabel.textContent = `Day ${progress} of the week`;
+            progressBar.value = weekProgress * 7;
+            
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            progressLabel.textContent = `${dayNames[adjustedDay]}, ${(weekProgress * 100).toFixed(2)}% of week complete`;
         }
 
         document.addEventListener('DOMContentLoaded', function () {
