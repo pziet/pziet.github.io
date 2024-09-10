@@ -62,7 +62,7 @@ body {
 }
 
 /* Styles for centering the days text */
-.center-days {
+/* .center-days {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -83,15 +83,15 @@ body {
   padding: 20px 40px;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+} */
 
 /* Media query for smaller screens */
-@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 480px) {
   #result {
     font-size: 3rem;
     padding: 15px 30px;
   }
-}
+} */
 
 
 /* Full-screen styles (default) */
