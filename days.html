@@ -107,14 +107,21 @@
             const progressLabel = document.getElementById('progress-label');
 
             progressBar.value = weekProgress * 7;
-            
+
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
             progressLabel.textContent = `${dayNames[adjustedDay]}, ${(weekProgress * 100).toFixed(2)}% of week complete`;
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        function updateAll() {
             calculateDaysSince();
             updateWeekProgress();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateAll();
+            setInterval(updateAll, 1000); // Update every second
+            // calculateDaysSince();
+            // updateWeekProgress();
             // setInterval(calculateDaysSince, 86400000); // Update every 24 hours
         });
     </script>
