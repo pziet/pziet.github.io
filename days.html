@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Days Since September 10, 2024</title>
+</head>
+<body>
+    <div class="content center-days">
+        <h2>Days Since September 10, 2024</h2>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculateDaysSince() {
+            const targetDate = new Date('2024-09-10');
+            const today = new Date();
+            const timeDifference = today - targetDate;
+            const daysSince = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            
+            const resultElement = document.getElementById('result');
+            resultElement.textContent = `${daysSince} days`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateDaysSince();
+            // setInterval(calculateDaysSince, 86400000); // Update every 24 hours
+        });
+    </script>
+</body>
+</html>
