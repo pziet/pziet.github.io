@@ -35,8 +35,6 @@ body {
   box-sizing: border-box;
   padding: 0 20px;
   margin: 0 auto;
-  /* Center the content */
-  /* Add padding instead of margin */
 }
 
 .links-list {
@@ -60,39 +58,6 @@ body {
 .links-link:hover {
   background-color: var(--pastel-red);
 }
-
-/* Styles for centering the days text */
-/* .center-days {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
-}
-
-.center-days h2 {
-  margin-bottom: 20px;
-}
-
-#result {
-  font-size: 4rem;
-  font-weight: bold;
-  color: var(--dark-orange);
-  background-color: var(--white);
-  padding: 20px 40px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-} */
-
-/* Media query for smaller screens */
-/* @media screen and (max-width: 480px) {
-  #result {
-    font-size: 3rem;
-    padding: 15px 30px;
-  }
-} */
-
 
 /* Full-screen styles (default) */
 @media screen and (min-width: 1024px) {
