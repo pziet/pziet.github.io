@@ -110,7 +110,7 @@
             progressBar.value = weekProgress * 7;
 
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            progressLabel.textContent = `${dayNames[adjustedDay]}, ${(weekProgress * 100).toFixed(2)}% of week complete`;
+            progressLabel.textContent = `${dayNames[adjustedDay]}, ${(weekProgress * 100).toFixed(4)}% of week complete`;
         }
 
         function updateAll() {
