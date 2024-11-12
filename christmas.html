@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,9 +62,17 @@
         }
 
         @keyframes blink {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
         }
 
         .grid-container {
@@ -167,6 +176,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="terminal-header">
@@ -211,46 +221,47 @@
                 <ul class="location-details">
                     <li>PARTICIPANTS: 11</li>
                     <li>GIFTS: £5 CHARITY SHOP</li>
-                    <li>RUGBY MATCH: BOOKING FOR 17:15 AT THE RUSHMERE!!!</li>
+                    <li>RUGBY MATCH: BOOKING FOR 17:15 AT THE RUSHMERE!!!!</li>
                 </ul>
             </div>
         </div>
     </div>
-    <script src="encryption_key.js"></script>
-    <script src="assignments.js"></script>
+    <!-- <script src="encryption_key.js"></script> -->
+    <!-- <script src="assignments.js"></script> -->
     <script>
         // Wrap all JavaScript in a DOMContentLoaded event listener
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+
             // These would come from separate files
-    
+
             // Get DOM elements once and store them
             const countdownElement = document.getElementById('countdown');
             const progressElement = document.getElementById('countdown-progress');
             const assignmentResultElement = document.getElementById('assignmentResult');
-    
+
             // Updated countdown timer to start from Monday midnight
             function updateCountdown() {
                 if (!countdownElement || !progressElement) return; // Guard clause
-    
+
                 const eventDate = new Date('November 16, 2024 14:00:00').getTime();
                 const startDate = new Date('November 11, 2024 00:00:00').getTime();
                 const now = new Date().getTime();
                 const distance = eventDate - now;
-    
+
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    
+
                 countdownElement.innerHTML = `${days}D ${hours}H ${minutes}M ${seconds}S`;
-    
+
                 // Update progress bar based on Monday start
                 const totalDuration = eventDate - startDate;
                 const elapsed = now - startDate;
                 const progress = (elapsed / totalDuration) * 100;
                 progressElement.style.width = `${Math.min(Math.max(progress, 0), 100)}%`;
             }
-    
+
             // Create continuous red snowflakes
             function createContinuousSnowflakes() {
                 return setInterval(() => {
@@ -259,7 +270,7 @@
                     snowflake.innerHTML = '*';
                     snowflake.style.left = Math.random() * window.innerWidth + 'px';
                     document.body.appendChild(snowflake);
-                    
+
                     const animation = snowflake.animate([
                         { transform: 'translateY(-5vh)', opacity: 0.5 },
                         { transform: `translateY(105vh) translateX(${Math.random() * 100 - 50}px)`, opacity: 0 }
@@ -267,11 +278,11 @@
                         duration: 3000 + Math.random() * 2000,
                         iterations: 1
                     });
-                    
+
                     animation.onfinish = () => snowflake.remove();
                 }, 300);
             }
-    
+
             // Modify existing snowflake creation for decrypt
             function createSnowflakes() {
                 for (let i = 0; i < 50; i++) {
@@ -280,7 +291,7 @@
                     snowflake.innerHTML = '*';
                     snowflake.style.left = Math.random() * window.innerWidth + 'px';
                     document.body.appendChild(snowflake);
-                    
+
                     const animation = snowflake.animate([
                         { transform: 'translateY(-5vh)', opacity: 1 },
                         { transform: `translateY(105vh) translateX(${Math.random() * 100 - 50}px)`, opacity: 0 }
@@ -288,18 +299,25 @@
                         duration: Math.random() * 2000 + 3000,
                         iterations: 1
                     });
-                    
+
                     animation.onfinish = () => snowflake.remove();
                 }
             }
-    
+            const assignments = {
+                "JAMES2024": "gAAAAABnM4JO83gZGNbQp6y_wuXrJwXpzh-_7rdZWqnK45jhB_8OkWU_msVwH2h8xTiD5pFD32s9Ibz7EodSdWu-lJV7BXFIEg==",
+                "JOHN2024": "gAAAAABnM4JOjQqWJnLmXnsS71LgHlwvrVYgeMMIqrztwH0yINmAE1TAGEPlupzoPUG4zCvMKnLAxpI_lKa3NVi4ORVkPh8z5A==",
+                "SARAH2024": "gAAAAABnM4JOgPK-3SeJqn9DerIqUvy3HqvZsehvzxtEg44tRYn1zzB27pgp8Y3vluX8ammhlR1mD7lyhVA21gzKg6eRE95C2g==",
+                "EMMA2024": "gAAAAABnM4JOxoLeTHNkLRMLg8MKnykKRULGY47v1ltHkDuqv4JZPnIS_zbqvGC7ECtn54YxkbLIM287TTy53fFFDp8RqAn2Kg=="
+            };
+
+            const ENCRYPTION_KEY = 'zjklXdu1fNZJv2zjp5Ho9ec8MM_y9rRs4Nl3o9rb9U4=';
             // Secret Santa reveal function
-            window.revealAssignment = function() {
+            window.revealAssignment = function () {
                 const codeInput = document.getElementById('codeInput');
                 if (!codeInput || !assignmentResultElement) return;
-    
+
                 const code = codeInput.value.toUpperCase();
-                
+
                 if (assignments[code]) {
                     try {
                         const decrypted = CryptoJS.AES.decrypt(assignments[code], ENCRYPTION_KEY)
@@ -316,14 +334,15 @@
                     assignmentResultElement.innerHTML = 'INVALID CODE. ACCESS DENIED.';
                 }
             };
-    
+
             // Initialize everything
             const countdownInterval = setInterval(updateCountdown, 1000);
             const snowflakeInterval = createContinuousSnowflakes();
-    
+
             // Initial calls
             updateCountdown();
         });
     </script>
 </body>
+
 </html>
