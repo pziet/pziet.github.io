@@ -218,74 +218,112 @@
     </div>
 
     <script>
-        // Encrypted assignments
-        const ENCRYPTION_KEY = 'christmas2024';
-        const assignments = {
-            'JAMES2024': CryptoJS.AES.encrypt('Sarah', ENCRYPTION_KEY).toString(),
-            'JOHN2024': CryptoJS.AES.encrypt('James', ENCRYPTION_KEY).toString(),
-            'SARAH2024': CryptoJS.AES.encrypt('John', ENCRYPTION_KEY).toString()
-        };
+        // Wrap all JavaScript in a DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            // Encrypted assignments
+            const ENCRYPTION_KEY = 'christmas2024';
+            const assignments = {
+                'JAMES2024': CryptoJS.AES.encrypt('Sarah', ENCRYPTION_KEY).toString(),
+                'JOHN2024': CryptoJS.AES.encrypt('James', ENCRYPTION_KEY).toString(),
+                'SARAH2024': CryptoJS.AES.encrypt('John', ENCRYPTION_KEY).toString()
+            };
 
-        // Countdown timer
-        function updateCountdown() {
-            const eventDate = new Date('November 16, 2024 14:00:00').getTime();
-            const now = new Date().getTime();
-            const distance = eventDate - now;
+            // Get DOM elements once and store them
+            const countdownElement = document.getElementById('countdown');
+            const progressElement = document.getElementById('countdown-progress');
+            const assignmentResultElement = document.getElementById('assignmentResult');
 
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            // Updated countdown timer to start from Monday midnight
+            function updateCountdown() {
+                if (!countdownElement || !progressElement) return; // Guard clause
 
-            document.getElementById('countdown').innerHTML = 
-                `${days}D ${hours}H ${minutes}M ${seconds}S`;
+                const eventDate = new Date('November 16, 2024 14:00:00').getTime();
+                const startDate = new Date('November 11, 2024 00:00:00').getTime();
+                const now = new Date().getTime();
+                const distance = eventDate - now;
 
-            // Update progress bar
-            const totalTimeUntilEvent = new Date('November 16, 2024 14:00:00').getTime() - new Date().getTime();
-            const progress = ((totalTimeUntilEvent - distance) / totalTimeUntilEvent) * 100;
-            document.getElementById('countdown-progress').style.width = `${100 - progress}%`;
-        }
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
+                countdownElement.innerHTML = `${days}D ${hours}H ${minutes}M ${seconds}S`;
 
-        // Secret Santa reveal function
-        function revealAssignment() {
-            const code = document.getElementById('codeInput').value.toUpperCase();
-            const resultDiv = document.getElementById('assignmentResult');
-            
-            if (assignments[code]) {
-                const decrypted = CryptoJS.AES.decrypt(assignments[code], ENCRYPTION_KEY)
-                    .toString(CryptoJS.enc.Utf8);
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = `ASSIGNMENT DECRYPTED: ${decrypted.toUpperCase()}`;
-                createSnowflakes();
-            } else {
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = 'INVALID CODE. ACCESS DENIED.';
+                // Update progress bar based on Monday start
+                const totalDuration = eventDate - startDate;
+                const elapsed = now - startDate;
+                const progress = (elapsed / totalDuration) * 100;
+                progressElement.style.width = `${Math.min(Math.max(progress, 0), 100)}%`;
             }
-        }
 
-        // Create snowflakes
-        function createSnowflakes() {
-            for (let i = 0; i < 50; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.className = 'snowflake';
-                snowflake.innerHTML = '*';
-                snowflake.style.left = Math.random() * window.innerWidth + 'px';
-                document.body.appendChild(snowflake);
-                
-                const animation = snowflake.animate([
-                    { transform: 'translateY(-5vh)', opacity: 1 },
-                    { transform: `translateY(105vh) translateX(${Math.random() * 100 - 50}px)`, opacity: 0 }
-                ], {
-                    duration: Math.random() * 2000 + 3000,
-                    iterations: 1
-                });
-                
-                animation.onfinish = () => snowflake.remove();
+            // Create continuous red snowflakes
+            function createContinuousSnowflakes() {
+                return setInterval(() => {
+                    const snowflake = document.createElement('div');
+                    snowflake.className = 'snowflake snowflake-red';
+                    snowflake.innerHTML = '*';
+                    snowflake.style.left = Math.random() * window.innerWidth + 'px';
+                    document.body.appendChild(snowflake);
+                    
+                    const animation = snowflake.animate([
+                        { transform: 'translateY(-5vh)', opacity: 0.5 },
+                        { transform: `translateY(105vh) translateX(${Math.random() * 100 - 50}px)`, opacity: 0 }
+                    ], {
+                        duration: 3000 + Math.random() * 2000,
+                        iterations: 1
+                    });
+                    
+                    animation.onfinish = () => snowflake.remove();
+                }, 300);
             }
-        }
+
+            // Modify existing snowflake creation for decrypt
+            function createSnowflakes() {
+                for (let i = 0; i < 50; i++) {
+                    const snowflake = document.createElement('div');
+                    snowflake.className = 'snowflake snowflake-green';
+                    snowflake.innerHTML = '*';
+                    snowflake.style.left = Math.random() * window.innerWidth + 'px';
+                    document.body.appendChild(snowflake);
+                    
+                    const animation = snowflake.animate([
+                        { transform: 'translateY(-5vh)', opacity: 1 },
+                        { transform: `translateY(105vh) translateX(${Math.random() * 100 - 50}px)`, opacity: 0 }
+                    ], {
+                        duration: Math.random() * 2000 + 3000,
+                        iterations: 1
+                    });
+                    
+                    animation.onfinish = () => snowflake.remove();
+                }
+            }
+
+            // Secret Santa reveal function
+            window.revealAssignment = function() {
+                const codeInput = document.getElementById('codeInput');
+                if (!codeInput || !assignmentResultElement) return;
+
+                const code = codeInput.value.toUpperCase();
+                
+                if (assignments[code]) {
+                    const decrypted = CryptoJS.AES.decrypt(assignments[code], ENCRYPTION_KEY)
+                        .toString(CryptoJS.enc.Utf8);
+                    assignmentResultElement.style.display = 'block';
+                    assignmentResultElement.innerHTML = `ASSIGNMENT DECRYPTED: ${decrypted.toUpperCase()}`;
+                    createSnowflakes();
+                } else {
+                    assignmentResultElement.style.display = 'block';
+                    assignmentResultElement.innerHTML = 'INVALID CODE. ACCESS DENIED.';
+                }
+            };
+
+            // Initialize everything
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            const snowflakeInterval = createContinuousSnowflakes();
+
+            // Initial calls
+            updateCountdown();
+        });
     </script>
 </body>
 </html>
