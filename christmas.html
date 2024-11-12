@@ -221,11 +221,13 @@
                 <ul class="location-details">
                     <li>PARTICIPANTS: 11</li>
                     <li>GIFTS: £5 CHARITY SHOP</li>
-                    <li>RUGBY MATCH: BOOKING FOR 17:15 AT THE RUSHMERE!!!!?</li>
+                    <li>RUGBY MATCH: BOOKING FOR 17:15 AT THE RUSHMERE!!!!??.</li>
                 </ul>
             </div>
         </div>
     </div>
+    <script src="encryption_key.js"></script>
+    <script src="assignments.js"></script>
     <script>
         // Wrap all JavaScript in a DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', function () {
@@ -301,14 +303,14 @@
                     animation.onfinish = () => snowflake.remove();
                 }
             }
-            const assignments = {
-                "JAMES2024": "gAAAAABnM4ejsP0FHnqoeSiA5Lf1j0cfWb2aYzpJiFtvC7kCklPujpa5Hv7JLEJJMG9jQbHmxqS6LuB567gyk_-SjWi99eWV9Q==",
-                "JOHN2024": "gAAAAABnM4ejoXqthv5KJXy6dafcH4-k9Bbi8UHG9ae2DbTlPvD1_07UjQvlSqddaEcVP_GbOzWf_78ZLIBZqicns57k3ZLzpQ==",
-                "SARAH2024": "gAAAAABnM4ej566yPrbseh_-wBEy2PWJaD1q6UQbSI2X8qfpOEwXQ_vj7G8T4ATg6Q7y22AzamFOB0rf5hamC7gFlssS4ldMDw==",
-                "EMMA2024": "gAAAAABnM4ejnZVGvK1YYvo09CKJWZS8cGrTy1hyTTp4k2HOpD5LSEt-EnytvUye-bkJIUT0F4wotY8cefqw0C5TEZWXZg0IlQ=="
-            };
+            // const assignments = {
+            //     "JAMES2024": "gAAAAABnM4ejsP0FHnqoeSiA5Lf1j0cfWb2aYzpJiFtvC7kCklPujpa5Hv7JLEJJMG9jQbHmxqS6LuB567gyk_-SjWi99eWV9Q==",
+            //     "JOHN2024": "gAAAAABnM4ejoXqthv5KJXy6dafcH4-k9Bbi8UHG9ae2DbTlPvD1_07UjQvlSqddaEcVP_GbOzWf_78ZLIBZqicns57k3ZLzpQ==",
+            //     "SARAH2024": "gAAAAABnM4ej566yPrbseh_-wBEy2PWJaD1q6UQbSI2X8qfpOEwXQ_vj7G8T4ATg6Q7y22AzamFOB0rf5hamC7gFlssS4ldMDw==",
+            //     "EMMA2024": "gAAAAABnM4ejnZVGvK1YYvo09CKJWZS8cGrTy1hyTTp4k2HOpD5LSEt-EnytvUye-bkJIUT0F4wotY8cefqw0C5TEZWXZg0IlQ=="
+            // };
 
-            const ENCRYPTION_KEY = 'EDmin5gBgG2pX_JE5g2t03DCcCCAQBEDw1vJMb498xY=';
+            // const ENCRYPTION_KEY = 'EDmin5gBgG2pX_JE5g2t03DCcCCAQBEDw1vJMb498xY=';
             // Secret Santa reveal function
             window.revealAssignment = function () {
                 const codeInput = document.getElementById('codeInput');
