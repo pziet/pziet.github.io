@@ -211,51 +211,55 @@
                 <ul class="location-details">
                     <li>PARTICIPANTS: 11</li>
                     <li>GIFTS: £5 CHARITY SHOP</li>
-                    <li>RUGBY MATCH: BOOKING FOR 17:15 AT THE RUSHMERE!</li>
+                    <li>RUGBY MATCH: BOOKING FOR 17:15 AT THE RUSHMERE!!</li>
                 </ul>
             </div>
         </div>
     </div>
-
+    <script src="encryption_key.js"></script>
+    <script src="assignments.js"></script>
     <script>
         // Wrap all JavaScript in a DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', function() {
-            // Encrypted assignments
-            const ENCRYPTION_KEY = 'christmas2024';
-            const assignments = {
-                'JAMES2024': CryptoJS.AES.encrypt('Sarah', ENCRYPTION_KEY).toString(),
-                'JOHN2024': CryptoJS.AES.encrypt('James', ENCRYPTION_KEY).toString(),
-                'SARAH2024': CryptoJS.AES.encrypt('John', ENCRYPTION_KEY).toString()
-            };
-
+            // These would come from separate files
+            // assignments.js
+            // const assignments = {
+            //     'PATRICK2024': 'U2FsdGVkX1...',  // This is a placeholder! 
+            //     'JOSEPH2024': 'U2FsdGVkX1...',   // Use output from Python script
+            //     'SARAH2024': 'U2FsdGVkX1...'     // for actual encrypted values
+            // };
+            
+            // // encryption_key.js
+            // const ENCRYPTION_KEY = 'your-generated-key'; // Use output from Python script
+    
             // Get DOM elements once and store them
             const countdownElement = document.getElementById('countdown');
             const progressElement = document.getElementById('countdown-progress');
             const assignmentResultElement = document.getElementById('assignmentResult');
-
+    
             // Updated countdown timer to start from Monday midnight
             function updateCountdown() {
                 if (!countdownElement || !progressElement) return; // Guard clause
-
+    
                 const eventDate = new Date('November 16, 2024 14:00:00').getTime();
                 const startDate = new Date('November 11, 2024 00:00:00').getTime();
                 const now = new Date().getTime();
                 const distance = eventDate - now;
-
+    
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
+    
                 countdownElement.innerHTML = `${days}D ${hours}H ${minutes}M ${seconds}S`;
-
+    
                 // Update progress bar based on Monday start
                 const totalDuration = eventDate - startDate;
                 const elapsed = now - startDate;
                 const progress = (elapsed / totalDuration) * 100;
                 progressElement.style.width = `${Math.min(Math.max(progress, 0), 100)}%`;
             }
-
+    
             // Create continuous red snowflakes
             function createContinuousSnowflakes() {
                 return setInterval(() => {
@@ -276,7 +280,7 @@
                     animation.onfinish = () => snowflake.remove();
                 }, 300);
             }
-
+    
             // Modify existing snowflake creation for decrypt
             function createSnowflakes() {
                 for (let i = 0; i < 50; i++) {
@@ -297,30 +301,35 @@
                     animation.onfinish = () => snowflake.remove();
                 }
             }
-
+    
             // Secret Santa reveal function
             window.revealAssignment = function() {
                 const codeInput = document.getElementById('codeInput');
                 if (!codeInput || !assignmentResultElement) return;
-
+    
                 const code = codeInput.value.toUpperCase();
                 
                 if (assignments[code]) {
-                    const decrypted = CryptoJS.AES.decrypt(assignments[code], ENCRYPTION_KEY)
-                        .toString(CryptoJS.enc.Utf8);
-                    assignmentResultElement.style.display = 'block';
-                    assignmentResultElement.innerHTML = `ASSIGNMENT DECRYPTED: ${decrypted.toUpperCase()}`;
-                    createSnowflakes();
+                    try {
+                        const decrypted = CryptoJS.AES.decrypt(assignments[code], ENCRYPTION_KEY)
+                            .toString(CryptoJS.enc.Utf8);
+                        assignmentResultElement.style.display = 'block';
+                        assignmentResultElement.innerHTML = `ASSIGNMENT DECRYPTED: ${decrypted.toUpperCase()}`;
+                        createSnowflakes();
+                    } catch (e) {
+                        assignmentResultElement.style.display = 'block';
+                        assignmentResultElement.innerHTML = 'DECRYPTION FAILED. INVALID CODE.';
+                    }
                 } else {
                     assignmentResultElement.style.display = 'block';
                     assignmentResultElement.innerHTML = 'INVALID CODE. ACCESS DENIED.';
                 }
             };
-
+    
             // Initialize everything
             const countdownInterval = setInterval(updateCountdown, 1000);
             const snowflakeInterval = createContinuousSnowflakes();
-
+    
             // Initial calls
             updateCountdown();
         });
