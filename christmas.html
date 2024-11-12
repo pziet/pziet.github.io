@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SW19 Christmas Lunch & Secret Santa 2024</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        :root {
+            --terminal-green: #00ff00;
+            --christmas-red: #ff0000;
+            --deep-red: #8b0000;
+            --terminal-bg: #0a0a0a;
+            --terminal-text: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'VT323', monospace;
+        }
+
+        body {
+            background-color: var(--terminal-bg);
+            color: var(--terminal-text);
+            line-height: 1.6;
+            padding: 20px;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #111;
+            padding: 20px;
+            border: 2px solid var(--terminal-green);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .terminal-header {
+            border-bottom: 2px solid var(--terminal-green);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-header h1 {
+            color: var(--terminal-green);
+            font-size: 2.5em;
+            text-transform: uppercase;
+        }
+
+        .live-indicator {
+            color: var(--terminal-green);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .terminal-box {
+            border: 1px solid var(--terminal-green);
+            padding: 15px;
+            background-color: rgba(0, 255, 0, 0.05);
+        }
+
+        .terminal-title {
+            color: var(--terminal-green);
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .terminal-value {
+            font-size: 2em;
+            color: var(--terminal-text);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #222;
+            margin-top: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--terminal-green);
+            width: 0%;
+            transition: width 1s;
+        }
+
+        input {
+            background-color: #222;
+            border: 1px solid var(--terminal-green);
+            color: var(--terminal-text);
+            padding: 10px;
+            font-size: 1.2em;
+            width: 200px;
+            font-family: 'VT323', monospace;
+        }
+
+        button {
+            background-color: var(--terminal-green);
+            color: var(--terminal-bg);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-family: 'VT323', monospace;
+        }
+
+        button:hover {
+            background-color: #00cc00;
+        }
+
+        .snowflake {
+            position: fixed;
+            color: var(--terminal-green);
+            font-size: 1.5em;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .location-details {
+            list-style-type: none;
+        }
+
+        .location-details li::before {
+            content: ">";
+            color: var(--terminal-green);
+            margin-right: 10px;
+        }
+
+        #assignmentResult {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid var(--terminal-green);
+            display: none;
+        }
+
+        .icons {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .icon {
+            font-size: 2em;
+            color: var(--terminal-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="terminal-header">
+            <h1>SW19 CHRISTMAS LUNCH</h1>
+            <span class="live-indicator">● LIVE</span>
+        </div>
+
+        <div class="grid-container">
+            <div class="terminal-box">
+                <div class="terminal-title">COUNTDOWN</div>
+                <div class="terminal-value" id="countdown">CALCULATING...</div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="countdown-progress"></div>
+                </div>
+            </div>
+
+            <div class="terminal-box">
+                <div class="terminal-title">EVENT DETAILS</div>
+                <ul class="location-details">
+                    <li>DATE: 16 NOV 2024</li>
+                    <li>TIME: 14:00</li>
+                    <li>LOCATION: FLAT 32, 2 STANLEY ROAD, SW19 8RL</li>
+                </ul>
+            </div>
+
+            <div class="terminal-box">
+                <div class="terminal-title">SECRET SANTA ASSIGNMENT</div>
+                <div class="input-group">
+                    <input type="text" id="codeInput" placeholder="ENTER CODE">
+                    <button onclick="revealAssignment()">DECRYPT</button>
+                </div>
+                <div id="assignmentResult"></div>
+            </div>
+
+            <div class="terminal-box">
+                <div class="terminal-title">EVENT STATS</div>
+                <div class="icons">
+                    <div class="icon">🎾</div>
+                    <div class="icon">🦌</div>
+                    <div class="icon">🎄</div>
+                </div>
+                <ul class="location-details">
+                    <li>PARTICIPANTS: 11</li>
+                    <li>GIFTS: £5 CHARITY SHOP</li>
+                    <li>RUGBY MATCH: BOOKING FOR 17:15 AT RUSHMERE</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Encrypted assignments
+        const ENCRYPTION_KEY = 'christmas2024';
+        const assignments = {
+            'JAMES2024': CryptoJS.AES.encrypt('Sarah', ENCRYPTION_KEY).toString(),
+            'JOHN2024': CryptoJS.AES.encrypt('James', ENCRYPTION_KEY).toString(),
+            'SARAH2024': CryptoJS.AES.encrypt('John', ENCRYPTION_KEY).toString()
+        };
+
+        // Countdown timer
+        function updateCountdown() {
+            const eventDate = new Date('November 16, 2024 14:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML = 
+                `${days}D ${hours}H ${minutes}M ${seconds}S`;
+
+            // Update progress bar
+            const totalTimeUntilEvent = new Date('November 16, 2024 14:00:00').getTime() - new Date().getTime();
+            const progress = ((totalTimeUntilEvent - distance) / totalTimeUntilEvent) * 100;
+            document.getElementById('countdown-progress').style.width = `${100 - progress}%`;
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Secret Santa reveal function
+        function revealAssignment() {
+            const code = document.getElementById('codeInput').value.toUpperCase();
+            const resultDiv = document.getElementById('assignmentResult');
+            
+            if (assignments[code]) {
+                const decrypted = CryptoJS.AES.decrypt(assignments[code], ENCRYPTION_KEY)
+                    .toString(CryptoJS.enc.Utf8);
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `ASSIGNMENT DECRYPTED: ${decrypted.toUpperCase()}`;
+                createSnowflakes();
+            } else {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = 'INVALID CODE. ACCESS DENIED.';
+            }
+        }
+
+        // Create snowflakes
+        function createSnowflakes() {
+            for (let i = 0; i < 50; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.innerHTML = '*';
+                snowflake.style.left = Math.random() * window.innerWidth + 'px';
+                document.body.appendChild(snowflake);
+                
+                const animation = snowflake.animate([
+                    { transform: 'translateY(-5vh)', opacity: 1 },
+                    { transform: `translateY(105vh) translateX(${Math.random() * 100 - 50}px)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 2000 + 3000,
+                    iterations: 1
+                });
+                
+                animation.onfinish = () => snowflake.remove();
+            }
+        }
+    </script>
+</body>
+</html>
