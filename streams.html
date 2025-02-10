@@ -29,18 +29,6 @@
                     href="https://timmonaghan.co.uk/blogs/tips-on-predicting-a-great-sunrise-or-sunset"
                     target="_blank">hue</a> prediction.
             </p>
-            <li><b>Guaranteeing JSON output from GPT-2</b> (<a href="https://youtu.be/HX5BCtUexo8?si=yj9mrwVfypco9dPI"
-                    target="_blank">video</a>, <a
-                    href="https://github.com/pziet/build-nanogpt/blob/master/json.ipynb"
-                    target="_blank">repo</a>)</li>
-
-            <p>
-                I force GPT-2 to generate output in JSON, and do this by fixing tokens to be parts of the JSON schema
-                (the "keys") and then only generating the "values" of the key:value pairs. Compared with other methods
-                which make repeated calls to the LLM and dynamically build the prompt, we only make *one* call to the
-                LLM seeing as we have direct access to the model.
-            </p>
-
             <li><b>Sherlock Holmes Eval</b> (<a href="https://github.com/pziet/sherlock"
                     target="_blank">repo</a>, <a href="https://youtu.be/d7ZL-05tsq0" target="_blank">video</a>)
             </li>
