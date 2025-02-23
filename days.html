@@ -44,17 +44,17 @@
 
         #week-progress::-webkit-progress-bar {
             background-color: var(--light-gray);
-            border-radius: 10px;
+            border-radius: 5px;
         }
 
         #week-progress::-webkit-progress-value {
             background-color: var(--dark-orange);
-            border-radius: 10px;
+            border-radius: 5px;
         }
 
         #week-progress::-moz-progress-bar {
             background-color: var(--dark-orange);
-            border-radius: 10px;
+            border-radius: 5px;
         }
 
         #progress-label {
@@ -74,6 +74,7 @@
 
 <body>
     <div class="content center-days">
+        <canvas id="graph" width="800" height="200"></canvas>
         <div id="result"></div>
         <progress id="week-progress" value="0" max="7"></progress>
         <div id="progress-label"></div>
@@ -81,7 +82,7 @@
 
     <script>
         function calculateDaysSince() {
-            const targetDate = new Date('2024-09-10');
+            const targetDate = new Date('2025-02-23T18:00:00');
             const today = new Date();
             const timeDifference = today - targetDate;
             const daysSince = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
@@ -93,11 +94,33 @@
         function updateWeekProgress() {
             const now = new Date();
             const dayOfWeek = now.getDay(); // 0 (Sunday) to 6 (Saturday)
-            const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 0 (Monday) to 6 (Sunday)
+            const hours = now.getHours();
+            
+            // Adjust day based on 18:00 cutoff
+            let adjustedDay;
+            if (dayOfWeek === 0 && hours < 18) {
+                adjustedDay = 6; // Still Saturday until 18:00 on Sunday
+            } else if (dayOfWeek === 0) {
+                adjustedDay = 0; // After 18:00 Sunday, start of new week
+            } else {
+                adjustedDay = dayOfWeek - 1;
+            }
 
-            const secondsInDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            // Calculate seconds since last Sunday 18:00
+            const secondsInDay = hours * 3600 + now.getMinutes() * 60 + now.getSeconds();
             const totalSecondsInWeek = 7 * 24 * 3600;
-            const weekProgress = (adjustedDay * 24 * 3600 + secondsInDay) / totalSecondsInWeek;
+            let weekProgress;
+            
+            if (dayOfWeek === 0 && hours < 18) {
+                // Before Sunday 18:00 - count as part of previous week
+                weekProgress = ((6 * 24 * 3600) + secondsInDay) / totalSecondsInWeek;
+            } else if (dayOfWeek === 0) {
+                // After Sunday 18:00 - start of new week
+                weekProgress = (secondsInDay - (18 * 3600)) / totalSecondsInWeek;
+            } else {
+                // Other days - add offset from Sunday 18:00
+                weekProgress = ((adjustedDay * 24 * 3600) + secondsInDay + (6 * 3600)) / totalSecondsInWeek;
+            }
 
             const progressBar = document.getElementById('week-progress');
             const progressLabel = document.getElementById('progress-label');
@@ -113,7 +136,76 @@
             updateWeekProgress();
         }
 
+        function drawGraph() {
+            const canvas = document.getElementById('graph');
+            const ctx = canvas.getContext('2d');
+            const minInWeek = 7 * 24 * 60
+            // Fake data
+            const data = [
+                { date: '18:00-23-02-2025', count: 6 },
+            ];
+            // Calculate minPerTask
+            data.forEach(point => {
+                point.minPerTask = Math.round(minInWeek / point.count)
+            });
+
+            // Calculate max count for y-axis
+            const maxMinPerTask = Math.max(...data.map(point => point.minPerTask));
+            const maxY = Math.min(Math.ceil(maxMinPerTask / 10) * 10, Math.ceil(minInWeek / 40));
+            const yTickInterval = Math.ceil(maxY / 4);
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw axes
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 150);
+            ctx.lineTo(750, 150); // X-axis
+            ctx.moveTo(50, 150);
+            ctx.lineTo(50, 10); // Y-axis
+            ctx.stroke();
+
+            // Draw ticks and labels
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'black';
+
+            // X-axis ticks
+            data.forEach((point, index) => {
+                const [time, day, month, year] = point.date.split('-');
+                const date = new Date(`${year}-${month}-${day}`);
+                if (date.getDate() <= 7) { // Minimum Sunday in the month
+                    const x = 50 + index * (700 / (data.length - 1));
+                    ctx.moveTo(x, 150);
+                    ctx.lineTo(x, 155);
+                    ctx.fillText(`${day}/${month}`, x, 170);
+                }
+            });
+
+            // Y-axis ticks
+            for (let i = yTickInterval; i <= maxY; i += yTickInterval) {
+                const y = 150 - (i / maxY) * 140;
+                ctx.moveTo(45, y);
+                ctx.lineTo(50, y);
+                ctx.fillText(i, 30, y + 3);
+            }
+            ctx.stroke();
+
+            // Plot data
+            ctx.beginPath();
+            ctx.moveTo(50, 150 - (data[0].minPerTask / maxY) * 140);
+            data.forEach((point, index) => {
+                const x = 50 + index * (700 / (data.length - 1));
+                const y = 150 - (point.minPerTask / maxY) * 140;
+                ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
+            drawGraph();
             updateAll();
             setInterval(updateAll, 1000); // Update every second
         });
