@@ -250,6 +250,21 @@
       background: #f7f7f7;
       border: none;
     }
+
+    .links {
+      display: inline-block;
+      margin-right: auto;
+    }
+
+    .links a {
+      color: #0000CC;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -262,6 +277,9 @@
       <option value="evensquare_plus_evensquare">Even Square Plus Even Square</option>
     </select>
     <button id="startBtn">Start Animation</button>
+    <div class="links" style="margin-left: 15px;">
+      Links: <a href="https://youtu.be/0SbunyqpFvQ" target="_blank">demo</a>, <a href="https://github.com/pziet/lean-agents" target="_blank">repo</a>
+    </div>
     <div class="speed-control">
       <label class="switch">
         <input type="checkbox" id="speedToggle">
