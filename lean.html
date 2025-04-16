@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Lean</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Courier, monospace;
+    }
+    /* Theorem selection dropdown at top */
+    #controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border-bottom: 1px solid #ccc;
+      background-color: #f5f5f5;
+    }
+    /* Main container for the entire app */
+    #app {
+      display: flex;
+      height: calc(100vh - 110px); /* Adjust to account for controls and agent roster */
+      width: 100vw;
+      overflow: hidden;
+    }
+    /* Left side: code panes */
+    #panes {
+      flex: 0 0 60%; /* Changed from 67% to 60% as requested */
+      background: #fafafa;
+      border-right: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .pane {
+      margin-bottom: 10px;
+      background: #f2f2f2;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      flex-shrink: 0;
+      transition: border-color 0.3s ease, border-width 0.3s ease;
+    }
+    .pane.working {
+      border: 2px solid #FF9800;
+      border-left: 4px solid #FF9800;
+      animation: pulseBorder 1.5s infinite;
+    }
+    .pane.proven {
+      border: 2px solid #4CAF50;
+      border-left: 4px solid #4CAF50;
+    }
+    @keyframes pulseBorder {
+      0% { border-color: #FF9800; border-width: 1px 1px 1px 4px; }
+      50% { border-color: #FF9800; border-width: 2px 2px 2px 6px; }
+      100% { border-color: #FF9800; border-width: 1px 1px 1px 4px; }
+    }
+    .pane pre {
+      margin: 0;
+    }
+    /* Right side: graph and controls */
+    #graphContainer {
+      flex: 1; /* Takes the remaining space */
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 10px;
+    }
+    #controls select, #controls button {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    #controls button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #controls button:hover {
+      background-color: #3e8e41;
+    }
+    #controls label {
+      font-weight: bold;
+    }
+    svg {
+      background: #f7f7f7;
+      border: 1px solid #ccc;
+    }
+    .node {
+      fill: #BF9264;
+      stroke: #333;
+      stroke-width: 1px;
+      cursor: pointer;
+      r: 25; 
+    }
+    .green {
+      fill: #BBD8A3 !important;
+    }
+    .label {
+      pointer-events: none; /* so text doesn't block node dragging */
+      font-size: 14px; /* Increased from 12px to match larger nodes */
+    }
+    /* Agent roster styling */
+    #agentRoster {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 40px; /* Ensure minimum height even when empty */
+    }
+    
+    .agentCard {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    
+    .agentCard.working {
+      border-left: 4px solid #4CAF50;
+    }
+    
+    /* Animation styling */
+    .node.working {
+      stroke: #FF9800;
+      stroke-width: 3px;
+      stroke-dasharray: 5,2;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { stroke-width: 2px; }
+      50% { stroke-width: 4px; }
+      100% { stroke-width: 2px; }
+    }
+    
+    /* For failed attempts */
+    .node.failed {
+      stroke: #F44336;
+      stroke-width: 2px;
+    }
+    .pane.failed {
+      border-color: #F44336;
+      border-width: 2px;
+    }
+    #animationStatus {
+      display: inline-block;
+      color: #4CAF50;
+      transition: opacity 0.5s ease;
+    }
+    
+    /* Toggle switch styling */
+    .speed-control {
+      display: flex;
+      align-items: center;
+      margin-left: auto; /* Push to right side */
+      gap: 10px;
+    }
+    
+    .speed-label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    /* The switch - the box around the slider */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+    }
+    
+    input:checked + .slider {
+      background-color: #673AB7;
+    }
+    
+    input:focus + .slider {
+      box-shadow: 0 0 1px #673AB7;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 24px;
+    }
+    
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    /* Make graph container fill available space */
+    #graphContainer {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    /* Make SVG fill the container */
+    #graph {
+      width: 100%;
+      height: 100%;
+      background: #f7f7f7;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Controls: Theorem selector and start button -->
+  <div id="controls">
+    <label for="theoremSelect">Choose theorem:</label>
+    <select id="theoremSelect">
+      <option value="evensquare_plus_even">Even Square Plus Even</option>
+      <option value="injective_comp">Injective Composition</option>
+      <option value="evensquare_plus_evensquare">Even Square Plus Even Square</option>
+    </select>
+    <button id="startBtn">Start Animation</button>
+    <div class="speed-control">
+      <label class="switch">
+        <input type="checkbox" id="speedToggle">
+        <span class="slider round"></span>
+      </label>
+      <span class="speed-label">3x Speed</span>
+    </div>
+    <div id="animationStatus" style="margin-left: 15px; font-weight: bold; opacity: 0;">Done!</div>
+  </div>
+  
+  <!-- Agent Roster - shows which agent is working on what -->
+  <div id="agentRoster"></div>
+
+  <div id="app">
+    <!-- Left side: code panes -->
+    <div id="panes"></div>
+
+    <!-- Right side: graph and controls -->
+    <div id="graphContainer">
+      <svg id="graph" width="500" height="400"></svg>
+    </div>
+  </div>
+
+  <!-- Include D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script type="module">
+    // #PZ: Issues:
+    // - Agent roster updating when changing to a new theorem, should match selected theorem **DONE**
+    // - Even square plus even animation seems to freeze with them all working on Even square. Same with even square plus even square, this one just freezes. **FIXED**
+    // - Make sure no work can happen on a node that has already been proven. **DONE**
+    // Make pane for graph take up entire space
+
+
+    // Your existing code
+    import eventLogs from './event-logs.js';
+    console.log(eventLogs);
+    // Example data sets for multiple theorems.
+    // You can add or modify these.
+    const theorems = {
+      evensquare_plus_even: {
+        nodes: [
+          {
+            id: 0,
+            name: "even_plus_even",
+            startCode: `import Mathlib.Tactic\nimport EvensquarePlusEven.stubs.isEven\n\nlemma even_plus_even (n m : ℕ) (hn : isEven n) (hm : isEven m) : isEven (n + m) := by\n  sorry\n`,
+            endCode: `def node0(text):\n    print("Node 0 completed!")\n`
+          },
+          {
+            id: 1,
+            name: "even_square",
+            startCode: `import Mathlib.Tactic\nimport EvensquarePlusEven.stubs.isEven\n\nlemma even_square (n : ℕ) (hn : isEven n) : isEven (n * n) := by\n  sorry\n`,
+            endCode: `def node1(text):\n    print("Node 1 completed!")\n`
+          },
+          {
+            id: 2,
+            name: "isEven",
+            startCode: `import Mathlib.Data.Nat.Basic\ndef isEven (n: ℕ) : Prop :=\n  ∃ k : ℕ, n = 2 * k\n`,
+            endCode: `def node2(text):\n    print("Node 2 completed!")\n`
+          },
+          {
+            id: 3,
+            name: "Theorem",
+            startCode: `import Mathlib.Tactic\nimport EvensquarePlusEven.stubs.isEven\nimport EvensquarePlusEven.stubs.EvenSquare\nimport EvensquarePlusEven.stubs.EvenPlusEven\n-- Prove that if n, m are even then n^2 + m is even\ntheorem even_square_plus_even (n m : ℕ) (hn : isEven n) (hm : isEven m) : isEven (n * n + m) := by\n  sorry\n`,
+            endCode: `def node3(text):\n    print("Node 3 completed!")\n`
+          }
+        ],
+        links: [
+          { source: 0, target: 3 },
+          { source: 1, target: 3 },
+          { source: 2, target: 0 },
+          { source: 2, target: 1 },
+          { source: 2, target: 3 }
+        ]
+      },
+      evensquare_plus_evensquare: {
+        nodes: [
+        {
+            id: 0,
+            name: "even_plus_even",
+            startCode: `import Mathlib.Tactic\nimport EvensquarePlusEven.stubs.isEven\n\nlemma even_plus_even (n m : ℕ) (hn : isEven n) (hm : isEven m) : isEven (n + m) := by\n  sorry\n`,
+            endCode: `def node0(text):\n    print("Node 0 completed!")\n`
+          },
+          {
+            id: 1,
+            name: "even_square",
+            startCode: `import Mathlib.Tactic\nimport EvensquarePlusEven.stubs.isEven\n\nlemma even_square (n : ℕ) (hn : isEven n) : isEven (n * n) := by\n  sorry\n`,
+            endCode: `def node1(text):\n    print("Node 1 completed!")\n`
+          },
+          {
+            id: 2,
+            name: "isEven",
+            startCode: `import Mathlib.Data.Nat.Basic\ndef isEven (n: ℕ) : Prop :=\n  ∃ k : ℕ, n = 2 * k\n`,
+            endCode: `def node2(text):\n    print("Node 2 completed!")\n`
+          },
+          {
+            id: 3,
+            name: "Theorem",
+            startCode: `import Mathlib.Tactic\nimport EvensquarePlusEvensquare.stubs.isEven\nimport EvensquarePlusEvensquare.stubs.EvenSquare\nimport EvensquarePlusEvensquare.stubs.EvenPlusEven\n\n-- Prove that if n and m are even, then n^2 + m^2 is even\ntheorem even_square_plus_even_square (n m : ℕ) (hn : isEven n) (hm : isEven m) : isEven (n * n + m * m) := by\n  sorry\n`,
+            endCode: `def node3(text):\n    print("Node 3 completed!")\n`
+          }
+        ],
+        links: [
+            { source: 0, target: 3 },
+            { source: 1, target: 3 },
+            { source: 2, target: 0 },
+            { source: 2, target: 1 },
+            { source: 2, target: 3 }
+        ]
+      },
+      injective_comp: {
+        nodes: [
+          {
+            id: 0,
+            name: "Injective",
+            startCode: `import Mathlib.Data.Nat.Basic\nimport Mathlib.Tactic\n\ndef Injective {A B : Type} (f : A → B) : Prop :=\n\n  ∀ x₁ x₂ : A, f x₁ = f x₂ → x₁ = x₂`,
+            endCode: `def node0(text):\n    print("Node 0 completed!")\n`
+          },
+          {
+            id: 1,
+            name: "injective_cancel_inner",
+            startCode: `import Mathlib.Tactic\nimport InjectiveComp.stubs.Injective\n\nvariable {A B : Type} {f : A → B}\n/--\nLemma 2: If f is injective and f(x₁) = f(x₂), then x₁ = x₂\n-/\nlemma injective_cancel_inner (hf : Injective f) (x₁ x₂ : A) (h : f x₁ = f x₂) :\n  x₁ = x₂ :=\n  sorry`,
+            endCode: `def node1(text):\n    print("Node 1 completed!")\n`
+          },
+          {
+            id: 2,
+            name: "injective_cancel_outer",
+            startCode: `import Mathlib.Tactic\nimport InjectiveComp.stubs.Injective\nvariable {A B C : Type} {f : A → B} {g : B → C}\n/--\nLemma 1: If g is injective and g(f(x₁)) = g(f(x₂)), then f(x₁) = f(x₂)\n-/\nlemma injective_cancel_outer (hg : Injective g) (x₁ x₂ : A) (h : g (f x₁) = g (f x₂)) :\n  f x₁ = f x₂ :=\n  sorry`,
+            endCode: `def node2(text):\n    print("Node 2 completed!")\n`
+          },
+          {
+            id: 3,
+            name: "comp_injective",
+            startCode: `import Mathlib.Data.Nat.Basic\nimport Mathlib.Tactic\nimport InjectiveComp.stubs.Injective\nimport InjectiveComp.stubs.InjectiveCancelOuter\nimport InjectiveComp.stubs.InjectiveCancelInner\nvariable {A B C : Type} {f : A → B} {g : B → C}\n/--\nTheorem: If f and g are injective, then g ∘ f is injective\n-/\ntheorem comp_injective (hf : Injective f) (hg : Injective g) :\n  Injective (g ∘ f) :=\n  sorry`,
+            endCode: `def node3(text):\n    print("Node 3 completed!")\n`
+          }
+        ],
+        links: [
+          { source: 0, target: 1 },
+          { source: 0, target: 2 },
+          { source: 0, target: 3 },
+          { source: 1, target: 3 },
+          { source: 2, target: 3 }
+        ]
+      },
+    };
+
+    // We'll keep references to the currently loaded data.
+    let currentNodes = [];
+    let currentLinks = [];
+
+    // Setup the main D3 pieces that won't be recreated from scratch.
+    const svg = d3.select("#graph");
+    const width = +svg.attr("width");
+    const height = +svg.attr("height");
+
+    // Define arrow marker once
+    svg.append("defs")
+      .append("marker")
+      .attr("id", "arrow")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 35)
+      .attr("refY", 0)
+      .attr("markerWidth", 8)
+      .attr("markerHeight", 8)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "#555");
+
+    let simulation = d3.forceSimulation()
+      .force("link", d3.forceLink().id(d => d.id).distance(172.5))
+      .force("charge", d3.forceManyBody().strength(-400))
+      .force("center", d3.forceCenter(width / 2, height / 2));
+
+    let link = null;
+    let node = null;
+    let label = null;
+
+    // Theorem loader function: wipes old data & re-binds the new dataset.
+    function loadTheorem(data) {
+      // Clear old code panes
+      d3.selectAll(".pane").remove();
+      // Clear old links/nodes/labels from the SVG
+      d3.selectAll(".link").remove();
+      d3.selectAll(".node").remove();
+      d3.selectAll(".label").remove();
+
+      // Store the new dataset in local references
+      currentNodes = data.nodes;
+      currentLinks = data.links;
+
+      // Build code panes for each node.
+      const paneContainer = d3.select("#panes")
+        .selectAll(".pane")
+        .data(currentNodes)
+        .enter()
+        .append("div")
+        .attr("class", "pane");
+
+      paneContainer.append("pre")
+        .append("code")
+        .attr("id", d => `pane${d.id}`)
+        .text(d => d.startCode);
+
+      // Setup the force simulation with new data and increased link distance
+      simulation.nodes(currentNodes).on("tick", ticked);
+      simulation.force("link")
+        .links(currentLinks)
+        .distance(172.5);
+      
+      simulation.alpha(1).restart();
+
+      // Add the link lines
+      link = svg.selectAll(".link")
+        .data(currentLinks)
+        .enter()
+        .append("line")
+        .attr("class", "link")
+        .attr("stroke", "#999")
+        .attr("stroke-width", 2)
+        .attr("marker-end", "url(#arrow)");
+
+      // Add the node circles
+      node = svg.selectAll(".node")
+        .data(currentNodes)
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("r", 25)
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended)
+        );
+
+      // Add labels
+      label = svg.selectAll(".label")
+        .data(currentNodes)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "14px")
+        .attr("font-family", "Courier, monospace")
+        .text(d => d.name);
+
+      // Call updateSvgSize after the layout is complete
+      setTimeout(updateSvgSize, 0);
+    }
+
+    // Force tick function
+    function ticked() {
+      // Updates positions of all graph elements (links, nodes, labels) on each simulation tick
+      // Called by D3's force simulation on each animation frame to update element positions
+      // based on the force-directed layout calculations
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+
+      label
+        .attr("x", d => d.x)
+        .attr("y", d => d.y - 20);
+    }
+
+    // Drag handlers
+    function dragstarted(event, d) {
+      // Handles the start of a node drag operation
+      // Restarts the force simulation and fixes the dragged node position
+      // @param {Object} event - The drag event object
+      // @param {Object} d - The node data object being dragged
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+      // Handles the dragging of a node
+      // Updates the fixed position of the dragged node to follow the cursor
+      // @param {Object} event - The drag event object
+      // @param {Object} d - The node data object being dragged
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+      // Handles the end of a node drag operation
+      // Stops the force simulation and releases the node's fixed position
+      // @param {Object} event - The drag event object
+      // @param {Object} d - The node data object being dragged
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+
+    // Helper to update code in a pane
+    function updatePane(nodeId) {
+      d3.select(`#pane${nodeId}`).text(currentNodes[nodeId].endCode);
+    }
+
+    // Agent data for tracking agent-lemma assignments
+    let agents = {};
+    
+    // Map lemma IDs to node IDs - add mapping for evensquare_plus_even
+    const lemmaToNodeMap = {
+      injective_comp: {
+        "Injective": 0,
+        "InjectiveCancelInner": 1,
+        "InjectiveCancelOuter": 2,
+        "InjectiveCompInjective": 3
+      },
+      evensquare_plus_even: {
+        "EvenPlusEven": 0,
+        "even_plus_even": 0,
+        "EvenSquare": 1,
+        "even_square": 1,
+        "isEven": 2,
+        "Theorem": 3
+      },
+      evensquare_plus_evensquare: {
+        "EvenPlusEven": 0,
+        "even_plus_even": 0,
+        "EvenSquare": 1,
+        "even_square": 1,
+        "isEven": 2,
+        "Theorem": 3
+      }
+    };
+    
+    // Add a set to track proven lemmas
+    let provenLemmas = new Set();
+
+    // Helper to update the agent roster display
+    function updateAgentRoster() {
+      const roster = d3.select("#agentRoster");
+      roster.html(""); // Clear current roster
+      
+      // Add a card for each agent
+      Object.entries(agents).forEach(([agentId, data]) => {
+        const card = roster.append("div")
+          .attr("class", `agentCard ${data.currentLemma ? 'working' : ''}`)
+          .attr("id", `agent-${agentId}`);
+        
+        card.html(`
+          <strong>${agentId}</strong>
+          ${data.currentLemma ? `<div>Working on: ${data.currentLemma}</div>` : '<div>Idle</div>'}
+        `);
+      });
+    }
+    
+    // Helper to handle agent events
+    function processAgentEvent(event) {
+      const { event_type, data } = event;
+      const { agent_id, lemma_id } = data;
+      
+      // Initialize agent if not exists
+      if (!agents[agent_id]) {
+        agents[agent_id] = { 
+          id: agent_id,
+          currentLemma: null,
+          completedLemmas: []
+        };
+      }
+      
+      // Map the lemma ID to node ID for the current theorem
+      const currentTheoremName = d3.select("#theoremSelect").property("value");
+      const nodeId = lemmaToNodeMap[currentTheoremName]?.[lemma_id];
+      
+      // Skip processing if this lemma has already been proven
+      if (provenLemmas.has(lemma_id)) {
+        console.log(`Skipping event for already proven lemma: ${lemma_id}`);
+        return;
+      }
+      
+      // DEBUG: Check if the node mapping is working
+      console.log(`Event: ${event_type}, Lemma: ${lemma_id}, Mapped node ID: ${nodeId}`);
+      
+      // If mapping fails, add a fallback by looking for similar lemma names
+      let mappedNodeId = nodeId;
+      if (mappedNodeId === undefined) {
+        // Try to find a close match based on case-insensitive comparison
+        const lemmaMap = lemmaToNodeMap[currentTheoremName] || {};
+        const possibleMatches = Object.entries(lemmaMap).find(([key]) => 
+          key.toLowerCase() === lemma_id.toLowerCase()
+        );
+        
+        if (possibleMatches) {
+          mappedNodeId = possibleMatches[1];
+          console.log(`Found alternative mapping for ${lemma_id}: ${mappedNodeId}`);
+        } else {
+          console.warn(`Cannot map lemma ${lemma_id} to a node for theorem ${currentTheoremName}`);
+        }
+      }
+      
+      // Skip processing if the mapped node is already marked as proven in the DOM
+      if (mappedNodeId !== undefined) {
+        const nodeElement = node.nodes()[mappedNodeId];
+        if (nodeElement && d3.select(nodeElement).classed("green")) {
+          console.log(`Skipping event for node ${mappedNodeId} which is already proven`);
+          return;
+        }
+      }
+      
+      switch(event_type) {
+        case "AgentWorking":
+          // Update agent data
+          agents[agent_id].currentLemma = lemma_id;
+          
+          // Update node visuals if node exists and is not already proven
+          if (mappedNodeId !== undefined) {
+            // Update node
+            d3.select(node.nodes()[mappedNodeId])
+              .classed("working", true);
+            
+            // Update corresponding pane
+            const paneElement = d3.select(`#pane${mappedNodeId}`).node().parentNode.parentNode;
+            d3.select(paneElement)
+              .classed("working", true);
+          }
+          break;
+          
+        case "LemmaProven":
+          // Mark this lemma as proven to prevent further processing
+          provenLemmas.add(lemma_id);
+          
+          // Update agent data
+          agents[agent_id].currentLemma = null;
+          agents[agent_id].completedLemmas.push(lemma_id);
+          
+          // Update node visuals and code
+          if (mappedNodeId !== undefined) {
+            // Update node
+            d3.select(node.nodes()[mappedNodeId])
+              .classed("working", false)
+              .classed("green", true);
+            
+            // Update corresponding pane
+            const paneElement = d3.select(`#pane${mappedNodeId}`).node().parentNode.parentNode;
+            d3.select(paneElement)
+              .classed("working", false)
+              .classed("proven", true);
+            
+            // Update the code with the proven version
+            currentNodes[mappedNodeId].endCode = data.proof;
+            updatePane(mappedNodeId);
+          }
+          break;
+          
+        case "LemmaAttemptFailed":
+          // Only show failed attempts for nodes that are not already proven
+          if (mappedNodeId !== undefined) {
+            const nodeElement = d3.select(node.nodes()[mappedNodeId]);
+            // Skip if node is already proven
+            if (!nodeElement.classed("green")) {
+              nodeElement.classed("failed", true);
+              
+              // Add failed class to pane too
+              const paneElement = d3.select(`#pane${mappedNodeId}`).node().parentNode.parentNode;
+              d3.select(paneElement).classed("failed", true);
+              
+              // Remove the failed indicator after a short delay
+              setTimeout(() => {
+                nodeElement.classed("failed", false);
+                d3.select(paneElement).classed("failed", false);
+              }, 1000);
+            }
+          }
+          break;
+      }
+      
+      // Update the roster display
+      updateAgentRoster();
+    }
+    
+    // Make sure the agent roster is visible at startup
+    function initAgentRoster() {
+      // Clear the roster display
+      d3.select("#agentRoster").html("");
+      
+      // Get the current theorem name
+      const currentTheoremName = d3.select("#theoremSelect").property("value");
+      
+      // Get events for the current theorem
+      const events = eventLogs[currentTheoremName] || [];
+      
+      // Extract unique agent IDs from the events
+      const agentIds = new Set();
+      events.forEach(event => {
+        if (event.data && event.data.agent_id) {
+          agentIds.add(event.data.agent_id);
+        }
+      });
+      
+      // Initialize agents object with real agents from events
+      agents = {};
+      agentIds.forEach(agentId => {
+        agents[agentId] = { 
+          id: agentId, 
+          currentLemma: null, 
+          completedLemmas: [] 
+        };
+      });
+      
+      // Update the roster display with these agents
+      updateAgentRoster();
+    }
+
+    // Call this on page load
+    initAgentRoster();
+
+    // Animation speed factor - 1x is default, 3x is faster
+    let speedFactor = 1;
+
+    // Set up the speed toggle event handler
+    d3.select("#speedToggle").on("change", function() {
+      speedFactor = this.checked ? 3 : 1;
+      d3.select(".speed-label").text(speedFactor === 3 ? "3x Speed" : "1x Speed");
+    });
+
+    // Update the startAnimation function to use the speed factor and show Done notification
+    function startAnimation() {
+      // Hide "Done!" indicator at start
+      d3.select("#animationStatus")
+        .style("opacity", "0")
+        .text("Processing...");
+      
+      // Reset proven lemmas tracking
+      provenLemmas = new Set();
+      
+      // Reset all nodes and agents
+      d3.selectAll(".node")
+        .classed("green", false)
+        .classed("working", false)
+        .classed("failed", false);
+      
+      // Reset all panes
+      d3.selectAll(".pane")
+        .classed("working", false)
+        .classed("failed", false)
+        .classed("proven", false);
+      
+      agents = {};
+      updateAgentRoster();
+      
+      // Get the current theorem's event log
+      const currentTheoremName = d3.select("#theoremSelect").property("value");
+      const events = eventLogs[currentTheoremName] || [];
+      
+      // DEBUG: Log the events for this theorem
+      console.log(`Starting animation for: ${currentTheoremName}`);
+      console.log(`Found ${events.length} events`);
+      console.log('First few events:', events.slice(0, 3));
+      
+      if (events.length === 0) {
+        alert("No animation data available for this theorem.");
+        return;
+      }
+      
+      // DEBUG: Check the lemma mappings for this theorem
+      console.log('Lemma to node mapping for this theorem:', lemmaToNodeMap[currentTheoremName]);
+      
+      // Reset code panes to initial state
+      currentNodes.forEach((nodeData, i) => {
+        d3.select(`#pane${nodeData.id}`).text(nodeData.startCode);
+      });
+      
+      // Calculate relative timing between events
+      let startTime = events[0].timestamp;
+      let processedEvents = 0;
+      const totalEvents = events.length;
+      
+      // Process each event with proper timing
+      events.forEach((event, index) => {
+        const relativeDelay = (event.timestamp - startTime) * 1000; // convert to ms
+        
+        // We'll compress the time by the speed factor to make the animation reasonable
+        const scaledDelay = relativeDelay / (10 * speedFactor);
+        
+        setTimeout(() => {
+          // DEBUG: Log when each event is processed
+          console.log(`Processing event ${index}:`, event.event_type, event.data?.lemma_id);
+          processAgentEvent(event);
+          
+          // Increment processed count
+          processedEvents++;
+          
+          // Check if all events are processed
+          if (processedEvents === totalEvents) {
+            // Show "Done!" indicator with animation
+            d3.select("#animationStatus")
+              .text("Done!")
+              .transition()
+              .duration(500)
+              .style("opacity", "1");
+              
+            // Optionally, hide it after a few seconds
+            setTimeout(() => {
+              d3.select("#animationStatus")
+                .transition()
+                .duration(500)
+                .style("opacity", "0");
+            }, 5000);
+          }
+        }, scaledDelay);
+      });
+    }
+
+    // Attach events
+    d3.select("#startBtn").on("click", () => {
+      startAnimation();
+    });
+
+    // Theorem select - Update to initialize agents from event logs
+    d3.select("#theoremSelect").on("change", function() {
+      const selected = this.value;
+      
+      // Clear agent data
+      agents = {};
+      
+      // Reset any CSS states
+      d3.selectAll(".pane")
+        .classed("working", false)
+        .classed("failed", false)
+        .classed("proven", false);
+      
+      loadTheorem(theorems[selected]);
+      
+      // Initialize the agent roster with actual agents from event logs
+      initAgentRoster();
+    });
+
+    // Load the matching default theorem on page load
+    // Change this line to match the default selected option in the dropdown
+    loadTheorem(theorems.evensquare_plus_even);
+
+    // Make the SVG fill the entire graphContainer
+    function updateSvgSize() {
+      const container = document.getElementById('graphContainer');
+      const svg = document.getElementById('graph');
+      
+      if (container && svg) {
+        // Set SVG to fill the entire container
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        
+        // Update force simulation center
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        simulation.force("center", d3.forceCenter(width / 2, height / 2));
+        simulation.alpha(0.3).restart();
+      }
+    }
+
+    // Call on window resize
+    window.addEventListener('resize', updateSvgSize);
+
+    // Call immediately and after DOM is fully loaded
+    updateSvgSize();
+    window.addEventListener('load', updateSvgSize);
+  </script>
+</body>
+</html>
